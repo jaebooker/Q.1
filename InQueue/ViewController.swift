@@ -27,7 +27,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var mapView: MKMapView!
     let locationManager = CLLocationManager()
-    let regionInMeters = 100.0
+    let regionInMeters: Double = 100.0
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.register(MKMarkerAnnotationView.self, forAnnotationViewWithReuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
@@ -59,6 +59,7 @@ class ViewController: UIViewController {
         case .authorizedWhenInUse:
             mapView.showsUserLocation = true
             centerViewOnUserLocation()
+            locationManager.startUpdatingLocation()
             break
         case .denied:
             break
@@ -76,10 +77,13 @@ class ViewController: UIViewController {
 }
 extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        //
+        guard let location = locations.last else { return }
+        let center = CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        let region = MKCoordinateRegion.init(center: center, latitudinalMeters: regionInMeters, longitudinalMeters: regionInMeters)
+        mapView.setRegion(region, animated: true)
     }
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        //
+        checkLocationAuthorization()
     }
 }
 
